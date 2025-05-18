@@ -1,0 +1,136 @@
+/* Partie index.html */
+
+#index{
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #333;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 50px;
+
+    & label {
+        margin-bottom: 10px;
+        color: #fff;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    & input[type="text"] {
+        padding: 10px;
+        border: 1px solid #fff;
+        border-radius: 5px;
+        width: 300px;
+        margin-bottom: 20px;
+        font-size: 16px;
+    }
+
+    & input[type="date"] {
+        padding: 10px;
+        border: 1px solid #fff;
+        border-radius: 5px;
+        width: 300px;
+        margin-bottom: 20px;
+        font-size: 16px;
+    }
+
+    & button {
+        padding: 10px 20px;
+        background-color: #fff;
+        color: #333;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+}
+
+
+/* Partie frise chronologique */
+
+#bodySuccess {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #333;
+    opacity: 1;
+}
+.timeline {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+    gap: 40px;
+}
+.timeline::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    background-color: #fff;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    margin-left: -3px;
+}
+.container {
+    padding: 20px 40px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background-color: inherit;
+    width: 50%;
+    height: 100%;
+    cursor: pointer;
+}
+.container.right {
+    left: 50%;
+}
+.container::after {
+    content: '';
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    right: -17px;
+    background-color: #fff;
+    border: 4px solid #333;
+    top: 15px;
+    border-radius: 50%;
+    z-index: 1;
+}
+.container.right::after {
+    left: -17px;
+}
+.content {
+    margin-top: 15px;
+    padding: 20px;
+    background-image: url(carteciel.png);
+    background-color: rgba(0, 0, 0, 0.5); /* Add a semi-transparent overlay */
+    background-blend-mode: overlay; /* Blend the image with the overlay */
+    background-size: cover;
+    color: white;
+    border-radius: 6px;
+    border: #fff 1px solid;
+    position: relative;
+    display: none; /* Hide details by default */
+}
+.container.left .content {
+    margin-left: 0;
+}
+.container.right .content {
+    margin-left: 20px;
+}
+.date {
+    font-weight: bold;
+    color: #fff;
+    padding: 5px;
+}
