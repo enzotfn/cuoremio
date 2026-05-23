@@ -3,21 +3,516 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vérification</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="script.js" defer></script>
+    <title>Notre Espace</title>
+    <style>
+        /* Un design sombre et épuré */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #121212; color: #f5f5f5; text-align: center; margin-top: 50px; }
+        input, button { padding: 10px; margin: 5px; border-radius: 5px; border: none; font-size: 16px; }
+        input { background-color: #2a2a2a; color: white; }
+        button { background-color: #4ade80; color: #121212; cursor: pointer; font-weight: bold; }
+        #le-vrai-site { display: none; max-width: 500px; margin: 0 auto; text-align: left; }
+        ul { list-style: none; padding: 0; }
+        li { background-color: #1e1e1e; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid #4ade80;}
+        .nouveau-lieu { background-color: #1e1e1e; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .nouveau-lieu input { width: 90%; margin: 8px auto; display: block; box-sizing: border-box; }
+        .nouveau-lieu select { background-color: #2a2a2a; color: white; padding: 10px; border-radius: 6px; border: none; font-size: 16px; width: 90%; display:block; margin:8px auto; box-sizing: border-box; -webkit-appearance: none; appearance: none; }
+        /* Compte à rebours */
+        #countdown { margin-top: 12px; font-size: 16px; color: #cbd5e1; }
+        .countdown-item .remaining { font-size: 20px; font-weight: 600; color: #e5e7eb; margin-top: 6px; }
+        .countdown-item .count-date { font-size: 13px; color: #9ca3af; }
+        .toggle-btn { background: transparent; border: 1px solid #374151; color: #f5f5f5; width:32px; height:32px; border-radius:16px; cursor:pointer; font-weight:700; display:flex; align-items:center; justify-content:center; font-size:18px; }
+        /* Sélection pour suppression: cachée par défaut, visible en mode selection-active */
+        .sel-checkbox { display: none; margin-right: 10px; }
+        body.selection-active .sel-checkbox { display: inline-block; }
+        /* Cacher les cases 'done' pendant le mode sélection pour ne montrer que les sel-checkbox */
+        body.selection-active .done-checkbox,
+        body.selection-active .film-done,
+        body.selection-active .music-done-enzo,
+        body.selection-active .music-done-lucie {
+            display: none !important;
+        }
+        /* Footer centré en bas de la page (pas fixe à l'écran) */
+        .selection-footer { position: relative; margin: 20px auto 40px auto; display:flex; gap:12px; justify-content:center; max-width:960px; }
+        .selection-footer .toggle-btn { min-width:110px; padding:8px 14px; width:auto; }
+        .delete-btn { background: #ef4444; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; min-width:160px; white-space:nowrap; }
+    </style>
 </head>
-<body id="index">
-    <h1>Bienvenue</h1>
-    <form onsubmit="event.preventDefault(); verifier();">
-        <label for="prenom">Prénom :</label>
-        <input type="text" id="prenom" name="prenom" required>
-        <br><br>
-        <label for="date">Date où l'on s'est mis ensemble :</label>
-        <input type="date" id="date" name="date" required>
-        <br><br>
-        <button type="submit">Valider</button>
-    </form>
-    <p id="erreur" style="color: red;"></p>
+<body>
+
+    <div id="ecran-connexion">
+        <h2>Date où on s'est mis ensemble</h2>
+        <input type="date" id="date-input" placeholder="AAAA-MM-JJ">
+        <button id="btn-entrer">Déverrouiller</button>
+    </div>
+
+    <div id="le-vrai-site">
+        <h2>📍 Espace zozo + lulu</h2>
+
+        <!-- Comptes à rebours (en haut) -->
+        <section id="section-countdowns">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <h3 style="margin:0">Comptes à rebours</h3>
+                <button id="toggle-add-countdown" class="toggle-btn">+</button>
+            </div>
+            <ul id="liste-countdowns">
+                <li>Chargement...</li>
+            </ul>
+            <div id="add-countdown-form" class="nouveau-lieu" style="display:none;margin-top:8px">
+                <h4>Ajouter un compte à rebours</h4>
+                <input type="text" id="countdown-nom" placeholder="Nom">
+                <input type="date" id="countdown-date" placeholder="Date">
+                <button id="btn-ajouter-countdown">Ajouter le compte à rebours</button>
+            </div>
+        </section>
+
+        <!-- Lieux / choses à faire -->
+        <section id="section-lieux" style="margin-top:18px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <h3 style="margin:0">Choses à faire</h3>
+                <button id="toggle-add-lieu" class="toggle-btn">+</button>
+            </div>
+
+            <ul id="liste-lieux">
+                <li>Chargement...</li>
+            </ul>
+
+            <div id="add-lieu-form" class="nouveau-lieu" style="display:none;margin-top:8px">
+                <h3>Ajouter un lieu</h3>
+                <input type="text" id="nom-lieu" placeholder="Nom">
+                <input type="text" id="ville-lieu" placeholder="Ville">
+                <select id="tag-lieu">
+                    <option value="">Type</option>
+                    <option value="Musée">Musée</option>
+                    <option value="Bar">Bar</option>
+                    <option value="Resto">Resto</option>
+                    <option value="Café">Café</option>
+                    <option value="Parc">Parc</option>
+                    <option value="Plage">Plage</option>
+                    <option value="Activité">Activité</option>
+                    <option value="Boutique">Boutique</option>
+                    <option value="Théâtre">Théâtre</option>
+                    <option value="Club">Club</option>
+                </select>
+                
+                <button id="btn-ajouter">Ajouter</button>
+            </div>
+        </section>
+
+        <!-- Films à voir -->
+        <section id="section-films" style="margin-top:18px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <h3 style="margin:0">Films à voir</h3>
+                <button id="toggle-add-film" class="toggle-btn">+</button>
+            </div>
+            <ul id="liste-films">
+                <li>Chargement...</li>
+            </ul>
+            <div id="add-film-form" class="nouveau-lieu" style="display:none;margin-top:8px">
+                <h4>Ajouter un film</h4>
+                <input type="text" id="film-nom" placeholder="Titre du film">
+                <button id="btn-ajouter-film">Ajouter le film</button>
+            </div>
+        </section>
+
+        <!-- Musiques à écouter -->
+        <section id="section-musiques" style="margin-top:18px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <h3 style="margin:0">Musiques à écouter</h3>
+                <button id="toggle-add-music" class="toggle-btn">+</button>
+            </div>
+            <ul id="liste-musiques">
+                <li>Chargement...</li>
+            </ul>
+            <div id="add-music-form" class="nouveau-lieu" style="display:none;margin-top:8px">
+                <h4>Ajouter une musique</h4>
+                <input type="text" id="music-nom" placeholder="Titre de la musique">
+                <input type="text" id="music-artiste" placeholder="Artiste">
+                <button id="btn-ajouter-music">Ajouter la musique</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer selection (sélection + suppression) -->
+    <div class="selection-footer" style="display:none">
+        <button id="btn-toggle-select" class="toggle-btn">Sélectionner</button>
+        <button id="btn-delete-selected" class="delete-btn" style="display:none">Supprimer la sélection</button>
+    </div>
+
+    <script type="module">
+        // 1. On importe les outils Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // 2. COPIE-COLLE TON FIREBASE CONFIG ICI
+        const firebaseConfig = {
+            apiKey: "AIzaSyAVJdirCaREp2nvI_mFeAu8Ay5ZBOHpe14",
+            authDomain: "cuoremio-website.firebaseapp.com",
+            projectId: "cuoremio-website",
+            storageBucket: "cuoremio-website.firebasestorage.app",
+            messagingSenderId: "448013459934",
+            appId: "1:448013459934:web:0074ff232d8aecd6b4fd4f"
+        };
+
+        // 3. On allume Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- LOGIQUE DU MOT DE PASSE ---
+        const notreDate = "2024-09-20"; // METS VOTRE VRAIE DATE ICI (format YYYY-MM-DD)
+
+        // Compte à rebours en direct vers `notreDate`
+        function formatRemaining(ms) {
+            if (ms <= 0) return 'Date atteinte';
+            const sec = Math.floor(ms / 1000) % 60;
+            const min = Math.floor(ms / (1000 * 60)) % 60;
+            const hrs = Math.floor(ms / (1000 * 60 * 60)) % 24;
+            const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+            return `${days}j ${String(hrs).padStart(2,'0')}h ${String(min).padStart(2,'0')}m ${String(sec).padStart(2,'0')}s`;
+        }
+
+        document.getElementById('btn-entrer').addEventListener('click', () => {
+            const dateSaisie = document.getElementById('date-input').value; // format YYYY-MM-DD
+
+            if (dateSaisie === notreDate) {
+                document.getElementById('ecran-connexion').style.display = 'none';
+                document.getElementById('le-vrai-site').style.display = 'block';
+                chargerLesLieux(); // On charge les lieux seulement si la date est bonne
+                chargerCountdowns(); // On charge aussi les comptes à rebours depuis Firestore
+                chargerFilms(); // charger films
+                chargerMusiques(); // charger musiques
+                // afficher le footer de sélection après connexion
+                const footer = document.querySelector('.selection-footer');
+                if (footer) footer.style.display = 'flex';
+            } else {
+                alert("Mauvaise date !");
+            }
+        });
+
+        // --- LOGIQUE D'AFFICHAGE EN TEMPS RÉEL ---
+        function chargerLesLieux() {
+            const lieuxRef = collection(db, "lieux");
+            const qLieux = query(lieuxRef, orderBy('city'));
+
+            // onSnapshot permet de mettre à jour la page en direct si quelqu'un ajoute/modifie un lieu
+            onSnapshot(qLieux, (snapshot) => {
+                const listeHtml = document.getElementById('liste-lieux');
+                listeHtml.innerHTML = ''; // On vide la liste avant de la re-remplir
+
+                if (snapshot.empty) {
+                    listeHtml.innerHTML = '<li>Aucun lieu</li>';
+                    return;
+                }
+
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const li = document.createElement('li');
+
+                    const name = escapeHtml(data.nom || 'Sans nom');
+                    const city = escapeHtml(data.city || data.ville || '—');
+                    const tag = escapeHtml(data.tag || data.type || '—');
+                    const done = !!data.done;
+
+                    li.innerHTML = `
+                        <input type="checkbox" class="sel-checkbox" data-id="${docSnap.id}" data-collection="lieux">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <div>
+                                <strong>${name}</strong>
+                                <div style="font-size:13px;color:#9ca3af">${city} • <em>${tag}</em></div>
+                            </div>
+                            <label style="font-size:14px;color:#9ca3af">
+                                <input type="checkbox" class="done-checkbox" data-id="${docSnap.id}" ${done ? 'checked' : ''}> Fait
+                            </label>
+                        </div>
+                    `;
+
+                    listeHtml.appendChild(li);
+
+                    // attach change listener to checkbox
+                    const checkbox = li.querySelector('.done-checkbox');
+                    if (checkbox) {
+                        checkbox.addEventListener('change', async (e) => {
+                            const id = e.target.dataset.id;
+                            const checked = e.target.checked;
+                            try {
+                                await updateDoc(doc(db, 'lieux', id), { done: checked });
+                            } catch (err) {
+                                console.error('Erreur mise à jour done:', err);
+                                alert('Impossible de mettre à jour l\'état.');
+                                e.target.checked = !checked; // revert
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
+        // --- LOGIQUE D'AJOUT ---
+        document.getElementById('btn-ajouter').addEventListener('click', async () => {
+            const nom = document.getElementById('nom-lieu').value.trim();
+            const city = document.getElementById('ville-lieu').value.trim();
+            const tag = document.getElementById('tag-lieu').value;
+
+            if (!nom || !city || !tag) return alert('Remplis le nom, la ville et le tag');
+
+            // On envoie à la base de données (par défaut non fait)
+            await addDoc(collection(db, "lieux"), {
+                nom: nom,
+                city: city,
+                tag: tag,
+                done: false,
+                dateAjout: new Date()
+            });
+
+            // On vide les champs
+            document.getElementById('nom-lieu').value = '';
+            document.getElementById('ville-lieu').value = '';
+            document.getElementById('tag-lieu').value = '';
+        });
+
+        // --- COMPTES À REBOURS (DB + MAJ EN DIRECT) ---
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"]+/g, (s) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
+        }
+
+        function updateCountdowns() {
+            document.querySelectorAll('.countdown-item').forEach(el => {
+                const target = new Date(el.dataset.target + 'T00:00:00');
+                const diff = target - new Date();
+                const remEl = el.querySelector('.remaining');
+                remEl.textContent = diff > 0 ? formatRemaining(diff) : 'Date atteinte';
+            });
+        }
+
+        let countdownUpdateInterval = null;
+        function startCountdownUpdater() {
+            if (countdownUpdateInterval) return;
+            updateCountdowns();
+            countdownUpdateInterval = setInterval(updateCountdowns, 1000);
+        }
+
+        async function chargerCountdowns() {
+            const countdownsRef = collection(db, 'countdowns');
+            const qCount = query(countdownsRef, orderBy('targetDate'));
+            onSnapshot(qCount, (snapshot) => {
+                const ul = document.getElementById('liste-countdowns');
+                ul.innerHTML = '';
+                if (snapshot.empty) {
+                    ul.innerHTML = '<li>Aucun compte à rebours</li>';
+                }
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const li = document.createElement('li');
+                    li.className = 'countdown-item';
+                    li.dataset.id = doc.id;
+                    li.dataset.target = data.targetDate || data.date || '';
+                    const name = escapeHtml(data.nom || 'Sans nom');
+
+                    // Format target date (YYYY-MM-DD) to French format DD/MM/YYYY for display
+                    let raw = li.dataset.target || '';
+                    let targetDateStr = '—';
+                    if (raw) {
+                        const parts = String(raw).split('-');
+                        if (parts.length === 3) {
+                            targetDateStr = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                        } else {
+                            targetDateStr = raw;
+                        }
+                    }
+                    targetDateStr = escapeHtml(targetDateStr);
+
+                    li.innerHTML = `
+                        <input type="checkbox" class="sel-checkbox" data-id="${doc.id}" data-collection="countdowns">
+                        <div>
+                            <div style="display:flex;justify-content:space-between;align-items:center">
+                                <strong>${name}</strong>
+                                <span class="count-date">${targetDateStr}</span>
+                            </div>
+                            <div class="remaining">—</div>
+                        </div>
+                    `;
+                    ul.appendChild(li);
+                });
+                startCountdownUpdater();
+            });
+        }
+
+        document.getElementById('btn-ajouter-countdown').addEventListener('click', async () => {
+            const nom = document.getElementById('countdown-nom').value.trim();
+            const date = document.getElementById('countdown-date').value; // YYYY-MM-DD
+            if (!nom || !date) return alert('Remplis le nom et la date');
+
+            await addDoc(collection(db, 'countdowns'), {
+                nom: nom,
+                targetDate: date,
+                createdAt: new Date()
+            });
+
+            document.getElementById('countdown-nom').value = '';
+            document.getElementById('countdown-date').value = '';
+        });
+
+        // Toggle handlers for showing/hiding add forms
+        document.getElementById('toggle-add-countdown').addEventListener('click', (e) => {
+            const form = document.getElementById('add-countdown-form');
+            const isVisible = form.style.display === 'block';
+            form.style.display = isVisible ? 'none' : 'block';
+            e.target.textContent = isVisible ? '+' : '−';
+        });
+
+        document.getElementById('toggle-add-lieu').addEventListener('click', (e) => {
+            const form = document.getElementById('add-lieu-form');
+            const isVisible = form.style.display === 'block';
+            form.style.display = isVisible ? 'none' : 'block';
+            e.target.textContent = isVisible ? '+' : '−';
+        });
+
+        // Toggle handlers for films and musiques
+        document.getElementById('toggle-add-film').addEventListener('click', (e) => {
+            const form = document.getElementById('add-film-form');
+            const isVisible = form.style.display === 'block';
+            form.style.display = isVisible ? 'none' : 'block';
+            e.target.textContent = isVisible ? '+' : '−';
+        });
+
+        document.getElementById('toggle-add-music').addEventListener('click', (e) => {
+            const form = document.getElementById('add-music-form');
+            const isVisible = form.style.display === 'block';
+            form.style.display = isVisible ? 'none' : 'block';
+            e.target.textContent = isVisible ? '+' : '−';
+        });
+
+        // Films: afficher et ajouter
+        async function chargerFilms() {
+            const filmsRef = collection(db, 'films');
+            const q = query(filmsRef, orderBy('createdAt'));
+            onSnapshot(q, (snapshot) => {
+                const ul = document.getElementById('liste-films');
+                ul.innerHTML = '';
+                if (snapshot.empty) return ul.innerHTML = '<li>Aucun film</li>';
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const li = document.createElement('li');
+                    const name = escapeHtml(data.nom || 'Sans nom');
+                    const done = !!data.done;
+                    li.innerHTML = `
+                        <input type="checkbox" class="sel-checkbox" data-id="${docSnap.id}" data-collection="films">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <div>
+                                <strong>${name}</strong>
+                            </div>
+                            <label style="font-size:14px;color:#9ca3af">
+                                <input type="checkbox" class="film-done" data-id="${docSnap.id}" ${done ? 'checked' : ''}> Vu
+                            </label>
+                        </div>
+                    `;
+                    ul.appendChild(li);
+                    const cb = li.querySelector('.film-done');
+                    if (cb) cb.addEventListener('change', async (e) => {
+                        try { await updateDoc(doc(db, 'films', e.target.dataset.id), { done: e.target.checked }); }
+                        catch (err) { console.error(err); alert('Erreur mise à jour film'); e.target.checked = !e.target.checked }
+                    });
+                });
+            });
+        }
+
+        document.getElementById('btn-ajouter-film').addEventListener('click', async () => {
+            const nom = document.getElementById('film-nom').value.trim();
+            if (!nom) return alert('Nom vide');
+            await addDoc(collection(db, 'films'), { nom: nom, done: false, createdAt: new Date() });
+            document.getElementById('film-nom').value = '';
+        });
+
+        // Musiques: afficher et ajouter
+        async function chargerMusiques() {
+            const musRef = collection(db, 'musiques');
+            const q = query(musRef, orderBy('createdAt'));
+            onSnapshot(q, (snapshot) => {
+                const ul = document.getElementById('liste-musiques');
+                ul.innerHTML = '';
+                if (snapshot.empty) return ul.innerHTML = '<li>Aucune musique</li>';
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const li = document.createElement('li');
+                    const name = escapeHtml(data.nom || 'Sans nom');
+                    const artiste = escapeHtml(data.artiste || '—');
+                    const enzo = !!data.enzo;
+                    const lucie = !!data.lucie;
+                    li.innerHTML = `
+                        <input type="checkbox" class="sel-checkbox" data-id="${docSnap.id}" data-collection="musiques">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <div>
+                                <strong>${name}</strong>
+                                <div style="font-size:13px;color:#9ca3af">${artiste}</div>
+                            </div>
+                            <div style="display:flex;gap:10px;align-items:center">
+                                <label style="font-size:14px;color:#9ca3af"><input type="checkbox" class="music-done-enzo" data-id="${docSnap.id}" ${enzo ? 'checked' : ''}> Zozo</label>
+                                <label style="font-size:14px;color:#9ca3af"><input type="checkbox" class="music-done-lucie" data-id="${docSnap.id}" ${lucie ? 'checked' : ''}> Lulu</label>
+                            </div>
+                        </div>
+                    `;
+                    ul.appendChild(li);
+                    const cbEnzo = li.querySelector('.music-done-enzo');
+                    const cbLucie = li.querySelector('.music-done-lucie');
+                    if (cbEnzo) cbEnzo.addEventListener('change', async (e) => {
+                        try { await updateDoc(doc(db, 'musiques', e.target.dataset.id), { enzo: e.target.checked }); }
+                        catch (err) { console.error(err); alert('Erreur mise à jour musique (Enzo)'); e.target.checked = !e.target.checked }
+                    });
+                    if (cbLucie) cbLucie.addEventListener('change', async (e) => {
+                        try { await updateDoc(doc(db, 'musiques', e.target.dataset.id), { lucie: e.target.checked }); }
+                        catch (err) { console.error(err); alert('Erreur mise à jour musique (Lucie)'); e.target.checked = !e.target.checked }
+                    });
+                });
+            });
+        }
+
+        document.getElementById('btn-ajouter-music').addEventListener('click', async () => {
+            const nom = document.getElementById('music-nom').value.trim();
+            const artiste = document.getElementById('music-artiste').value.trim();
+            if (!nom || !artiste) return alert('Remplis le nom et l\'artiste');
+            await addDoc(collection(db, 'musiques'), { nom: nom, artiste: artiste, enzo: false, lucie: false, createdAt: new Date() });
+            document.getElementById('music-nom').value = '';
+            document.getElementById('music-artiste').value = '';
+        });
+
+        // Mode sélection / suppression
+        let selectionMode = false;
+        const btnToggleSelect = document.getElementById('btn-toggle-select');
+        const btnDeleteSelected = document.getElementById('btn-delete-selected');
+
+        btnToggleSelect.addEventListener('click', () => {
+            selectionMode = !selectionMode;
+            document.body.classList.toggle('selection-active', selectionMode);
+            btnToggleSelect.textContent = selectionMode ? 'Annuler' : 'Sélectionner';
+            btnDeleteSelected.style.display = selectionMode ? 'inline-block' : 'none';
+            if (!selectionMode) {
+                // clear any checked selection boxes
+                document.querySelectorAll('.sel-checkbox').forEach(cb => cb.checked = false);
+            }
+        });
+
+        btnDeleteSelected.addEventListener('click', async () => {
+            const selected = Array.from(document.querySelectorAll('.sel-checkbox:checked'));
+            if (selected.length === 0) return alert('Aucun élément sélectionné');
+            if (!confirm(`Supprimer ${selected.length} élément(s) ?`)) return;
+
+            // delete each selected doc from its collection
+            for (const cb of selected) {
+                const id = cb.dataset.id;
+                const collectionName = cb.dataset.collection;
+                try {
+                    await deleteDoc(doc(db, collectionName, id));
+                } catch (err) {
+                    console.error('Erreur suppression', err);
+                    alert('Erreur lors de la suppression');
+                }
+            }
+
+            // exit selection mode
+            selectionMode = false;
+            document.body.classList.remove('selection-active');
+            btnToggleSelect.textContent = 'Sélectionner';
+            btnDeleteSelected.style.display = 'none';
+        });
+    </script>
 </body>
 </html>
