@@ -41,7 +41,7 @@
 
     <div id="ecran-connexion">
         <h2>Date où on s'est mis ensemble</h2>
-        <input type="date" id="date-input" placeholder="AAAA-MM-JJ">
+        <input type="text" id="date-input" placeholder="DD/MM/YYYY" maxlength="10">
         <button id="btn-entrer">Déverrouiller</button>
     </div>
 
@@ -158,7 +158,7 @@
         const db = getFirestore(app);
 
         // --- LOGIQUE DU MOT DE PASSE ---
-        const notreDate = "2024-09-20"; // METS VOTRE VRAIE DATE ICI (format YYYY-MM-DD)
+        const notreDate = "20/09/2024"; // Format DD/MM/YYYY
 
         // Compte à rebours en direct vers `notreDate`
         function formatRemaining(ms) {
@@ -170,8 +170,21 @@
             return `${days}j ${String(hrs).padStart(2,'0')}h ${String(min).padStart(2,'0')}m ${String(sec).padStart(2,'0')}s`;
         }
 
+        // Formatage automatique DD/MM/YYYY lors de la saisie
+        const dateInput = document.getElementById('date-input');
+        if (dateInput) {
+            dateInput.addEventListener('input', (e) => {
+                let cleaned = e.target.value.replace(/\D/g, '').slice(0, 8);
+                let parts = [];
+                if (cleaned.length > 0) parts.push(cleaned.slice(0, 2));
+                if (cleaned.length > 2) parts.push(cleaned.slice(2, 4));
+                if (cleaned.length > 4) parts.push(cleaned.slice(4, 8));
+                e.target.value = parts.join('/');
+            });
+        }
+
         document.getElementById('btn-entrer').addEventListener('click', () => {
-            const dateSaisie = document.getElementById('date-input').value; // format YYYY-MM-DD
+            const dateSaisie = document.getElementById('date-input').value.trim(); // format DD/MM/YYYY
 
             if (dateSaisie === notreDate) {
                 document.getElementById('ecran-connexion').style.display = 'none';
